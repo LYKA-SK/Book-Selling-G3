@@ -1,14 +1,13 @@
-import express from "express";
-import connectDB from "./config/database";
-import Router from "./routes/index";
+import dotenv from "dotenv";
+dotenv.config();
+import app from "./app";
+import { connectDB } from "./config/db";
 
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const PORT = process.env.PORT || 4000;
+// Prefer MONGODB_URI (used in .env), fall back to older MONGO_URI or local default
+const MONGO_URI =
+  process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb://localhost:27017/readable";
 
-connectDB();
-
-app.use("/api/v1", Router);
-app.listen(4000, () => {
-  console.log(`server run on port 4000`);
+connectDB(MONGO_URI).then(() => {
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 });
