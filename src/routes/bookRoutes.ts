@@ -1,4 +1,6 @@
-import express from "express";
+import { Router } from "express";
+import { protect } from "../middlewares/authMiddleware";
+import { createBookController, getBooksController } from "../controllers/bookController";
 import {
   createBookService,
   getAllBooksService,
@@ -7,8 +9,13 @@ import {
   deleteBookService,
 } from "../services/bookService";
 
-const router = express.Router();
+const router = Router();
 
+// Admin-only: Create a new book
+router.post("/admin/books", protect(["admin"]), createBookController);
+
+// Customer & Admin: Get all books
+router.get("/books", protect(["customer", "admin"]), getBooksController);
 router.post("/", async (req, res) => {
   const result = await createBookService(req.body);
   res.status(result.success ? 201 : 400).json(result);

@@ -1,22 +1,13 @@
-import express from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
-import bookRoutes from "./routes/bookRoutes";
-
 dotenv.config();
+import app from "./app";
+import { connectDB } from "./config/db";
 
-const app = express();
 const PORT = process.env.PORT || 4000;
-const MONGODB_URI = process.env.MONGODB_URI || "";
+// Prefer MONGODB_URI (used in .env), fall back to older MONGO_URI or local default
+const MONGO_URI =
+  process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb://localhost:27017/readable";
 
-app.use(express.json());
-app.use("/api/books", bookRoutes);
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log("✅ MongoDB connected successfully");
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
-  });
+connectDB(MONGO_URI).then(() => {
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+});
