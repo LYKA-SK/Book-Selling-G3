@@ -9,3 +9,5 @@ export const connectDB = async (MONGO_URI: string) => {
     process.exit(1);
   }
 };
+
+

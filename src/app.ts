@@ -3,17 +3,18 @@ import router from "./routes/index";
 import adminRoutes from "./routes/admin";
 
 const app = express();
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/admin", adminRoutes);
 
-// Mount all routes
+// Routes
+app.use("/api/admin", adminRoutes);
 app.use("/api/v1", router);
 
+// Base route
 app.get("/", (req, res) => {
-  res.send("✅ Readable API is running!");
+  res.json({ message: "✅ Readable API is running!" });
 });
+
 export default app;
-
-
-

@@ -11,20 +11,22 @@ import {
 
 const router = Router();
 
-// Admin-only: Create a new book
-router.post("/admin/books", protect(["admin"]), createBookController);
-
-// Customer & Admin: Get all books
-router.get("/books", protect(["customer", "admin"]), getBooksController);
-router.post("/", async (req, res) => {
+// Public routes (no authentication required)
+// Create a new book
+router.post("/create-book", async (req, res) => {
   const result = await createBookService(req.body);
   res.status(result.success ? 201 : 400).json(result);
 });
 
+// Get all books
 router.get("/", async (_req, res) => {
   const result = await getAllBooksService();
   res.status(result.success ? 200 : 400).json(result);
 });
+
+// Protected routes (with authentication) - optional
+router.post("/protected/create", protect(["admin"]), createBookController);
+router.get("/protected/list", protect(["customer", "admin"]), getBooksController);
 
 router.get("/:id", async (req, res) => {
   const result = await getBookByIdService(req.params.id);
@@ -42,3 +44,6 @@ router.delete("/:id", async (req, res) => {
 });
 
 export default router;
+
+
+
