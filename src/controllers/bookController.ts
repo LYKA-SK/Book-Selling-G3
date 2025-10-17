@@ -1,17 +1,23 @@
-import { createBookService } from "../services/bookService";
-import { CreateBookInput } from "../types/book";
 import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
 
-export const createBook = async (req: Request, res: Response) => {
-  try {
-    const bookData: CreateBookInput = req.body;
-    const result = await createBookService(bookData);
-    res.status(201).json(result);
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message:
-        error instanceof Error ? error.message : "Failed to create book.",
-    });
+// Mock: Replace with actual Mongoose Book model
+const books: any[] = [];
+
+export const createBookController = asyncHandler(async (req: Request, res: Response) => {
+  const { title, author, price, category, stock } = req.body;
+
+  if (!title || !author || !price || !category || !stock) {
+    res.status(400);
+    throw new Error("All book fields are required");
   }
-};
+
+  const book = { id: books.length + 1, title, author, price, category, stock };
+  books.push(book);
+
+  res.status(201).json({ message: "Book created", book });
+});
+
+export const getBooksController = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ books });
+});

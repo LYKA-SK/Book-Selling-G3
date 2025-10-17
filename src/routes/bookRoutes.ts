@@ -1,4 +1,6 @@
-import express from "express";
+import { Router } from "express";
+import { protect } from "../middlewares/authMiddleware";
+import { createBookController, getBooksController } from "../controllers/bookController";
 import {
   createBookService,
   getAllBooksService,
@@ -7,17 +9,24 @@ import {
   deleteBookService,
 } from "../services/bookService";
 
-const router = express.Router();
+const router = Router();
 
-router.post("/", async (req, res) => {
+// Public routes (no authentication required)
+// Create a new book
+router.post("/create-book", async (req, res) => {
   const result = await createBookService(req.body);
   res.status(result.success ? 201 : 400).json(result);
 });
 
+// Get all books
 router.get("/", async (_req, res) => {
   const result = await getAllBooksService();
   res.status(result.success ? 200 : 400).json(result);
 });
+
+// Protected routes (with authentication) - optional
+router.post("/protected/create", protect(["admin"]), createBookController);
+router.get("/protected/list", protect(["customer", "admin"]), getBooksController);
 
 router.get("/:id", async (req, res) => {
   const result = await getBookByIdService(req.params.id);
@@ -35,3 +44,6 @@ router.delete("/:id", async (req, res) => {
 });
 
 export default router;
+
+
+
