@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { protect } from "../middlewares/authMiddleware";
+import { authorize, protect } from "../middlewares/auth";
 import { createBookController, getBooksController } from "../controllers/bookController";
 import {
   createBookService,
@@ -24,10 +24,8 @@ router.get("/", async (_req, res) => {
   res.status(result.success ? 200 : 400).json(result);
 });
 
-// Protected routes (with authentication) - optional
-router.post("/protected/create", protect(["admin"]), createBookController);
-router.get("/protected/list", protect(["customer", "admin"]), getBooksController);
-
+router.post("/protected/create", protect, authorize("admin"), createBookController);
+router.get("/protected/list", protect, authorize("customer", "admin"), getBooksController);
 router.get("/:id", async (req, res) => {
   const result = await getBookByIdService(req.params.id);
   res.status(result.success ? 200 : 404).json(result);
