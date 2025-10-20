@@ -1,6 +1,33 @@
-import { Router } from "express";
-import { authorize, protect } from "../middlewares/auth";
-import { createBookController, getBooksController } from "../controllers/bookController";
+import { Router, Request, Response, NextFunction } from "express";
+
+function protect(allowedRoles: string[] = []) {
+  return (
+    req: Request & { user?: { role?: string } },
+    res: Response,
+    next: NextFunction
+  ) => {
+    // If no roles specified, allow access
+    if (!allowedRoles || allowedRoles.length === 0) return next();
+
+    const user = req.user;
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated" });
+    }
+
+    if (allowedRoles.length && !allowedRoles.includes(user.role || "")) {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    next();
+  };
+}
+
+import {
+  createBookController,
+  getBooksController,
+} from "../controllers/bookController";
 import {
   createBookService,
   getAllBooksService,
@@ -24,8 +51,14 @@ router.get("/", async (_req, res) => {
   res.status(result.success ? 200 : 400).json(result);
 });
 
-router.post("/protected/create", protect, authorize("admin"), createBookController);
-router.get("/protected/list", protect, authorize("customer", "admin"), getBooksController);
+// Protected routes (with authentication) - optional
+router.post("/protected/create", protect(["admin"]), createBookController);
+router.get(
+  "/protected/list",
+  protect(["customer", "admin"]),
+  getBooksController
+);
+
 router.get("/:id", async (req, res) => {
   const result = await getBookByIdService(req.params.id);
   res.status(result.success ? 200 : 404).json(result);
@@ -42,6 +75,3 @@ router.delete("/:id", async (req, res) => {
 });
 
 export default router;
-
-
-
