@@ -13,7 +13,9 @@
     "paths": { "*": ["node_modules/*"] },
     "sourceMap": true,
     "resolveJsonModule": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "types": ["node", "express"],
+    "moduleResolution": "node"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
