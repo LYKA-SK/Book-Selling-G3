@@ -2,6 +2,8 @@ import express from "express";
 import router from "./routes/index";
 import adminRoutes from "./routes/admin";
 import userRoutes from "./routes/user";
+import categoriesRoutes from "./routes/categoriesRoute";
+
 
 
 const app = express();
