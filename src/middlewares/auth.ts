@@ -2,7 +2,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
-import { User } from "../models/User";
+// import { IUser } from "../models/User"; // with curly braces
+import User from "../models/User"; // default import
 
 const jwtSecret = process.env.JWT_SECRET || "change_me";
 

@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";
 import { connectDB } from "../config/db";
-import { User } from "../models/User";
+// import { IUser } from "../models/User"; // with curly braces
+import User from "../models/User"; // default import
 
 (async function testLogin() {
   const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
@@ -33,7 +34,7 @@ import { User } from "../models/User";
   }
   
   console.log("✅ User found in database");
-  console.log(`  Name: ${user.name}`);
+  console.log(`  Name: ${user.username}`);
   console.log(`  Email: ${user.email}`);
   console.log(`  Role: ${user.role}\n`);
   

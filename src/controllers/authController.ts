@@ -2,7 +2,8 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
-import { User, IUser } from "../models/User";
+import { IUser } from "../models/User"; // with curly braces
+import User from "../models/User"; // default import
 import { isEmail, passwordMin } from "../utils/validate";
 
 const jwtSecret = process.env.JWT_SECRET || "change_me";
@@ -33,10 +34,10 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     throw new Error("email already registered");
   }
 
-  const user = await User.create({ name, email, password, role }) as IUser;
+  const user = await User.create({ username: name, email, password, role }) as IUser;
   res.status(201).json({
     id: user._id,
-    name: user.name,
+    name: user.username,
     email: user.email,
     role: user.role,
     token: generateToken(user._id.toString(), user.role)
@@ -62,7 +63,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
   res.json({
     id: user._id,
-    name: user.name,
+    name: user.username,
     email: user.email,
     role: user.role,
     token: generateToken(user._id.toString(), user.role)
