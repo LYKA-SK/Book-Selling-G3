@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+import { RequestHandler } from "express";
 
 // Mock: Replace with actual Mongoose Book model
 const books: any[] = [];
 
-export const createBookController = asyncHandler(async (req: Request, res: Response) => {
+export const createBookController: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   const { title, author, price, category, stock } = req.body;
 
   if (!title || !author || !price || !category || !stock) {
@@ -18,6 +19,6 @@ export const createBookController = asyncHandler(async (req: Request, res: Respo
   res.status(201).json({ message: "Book created", book });
 });
 
-export const getBooksController = asyncHandler(async (req: Request, res: Response) => {
+export const getBooksController: RequestHandler = asyncHandler(async (req: Request, res: Response) => {
   res.json({ books });
 });
