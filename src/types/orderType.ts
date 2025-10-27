@@ -1,14 +1,11 @@
 import { Types } from "mongoose";
 
-export interface IOrderInput {
-  userId: Types.ObjectId;
-  orderItemId?: Types.ObjectId[]; // optional when creating order first
-}
-
-export interface IOrderResponse {
-  _id: Types.ObjectId;
-  userId: Types.ObjectId;
-  orderItemId: Types.ObjectId[];
-  createdAt: Date;
-  updatedAt: Date;
+export interface IOrder {
+  _id?: Types.ObjectId;
+  user: Types.ObjectId;
+  orderItems: Types.ObjectId[];
+  totalPrice: number;
+  status: "pending" | "paid" | "shipped" | "completed" | "cancelled";
+  createdAt?: Date;
+  updatedAt?: Date;
 }

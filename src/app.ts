@@ -3,6 +3,7 @@ import router from "./routes/index";
 import adminRoutes from "./routes/admin";
 import categoriesRoutes from "./routes/categoriesRoute";
 import bookRoutes from "./routes/bookRoutes";
+import orderRoutes from "./routes/orderRoutes";
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/admin", adminRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/v1", router);
 

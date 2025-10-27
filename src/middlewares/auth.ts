@@ -1,9 +1,7 @@
-// src/middleware/auth.ts
-import { Request, Response, NextFunction, RequestHandler } from "express";
+import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
-// import { IUser } from "../models/User"; // with curly braces
-import User from "../models/User"; // default import
+import User from "../models/User";
 
 const jwtSecret = process.env.JWT_SECRET || "change_me";
 
@@ -15,33 +13,42 @@ export const protect = asyncHandler(
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     let token = "";
 
+    // ✅ Check for Bearer token in header
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1];
     }
 
+    // ❌ No token
     if (!token) {
       res.status(401);
       throw new Error("Not authorized, token missing");
     }
 
     try {
+      // ✅ Decode and verify token
       const decoded = jwt.verify(token, jwtSecret) as any;
+
+      // ✅ Find user and attach to request
       const user = await User.findById(decoded.id).select("-password");
       if (!user) {
         res.status(401);
         throw new Error("User not found");
       }
+
       req.user = user;
       next();
-    } catch (err) {
-      res.status(401);
-      throw new Error("Not authorized, token invalid");
+    } catch (err: any) {
+      if (err.name === "TokenExpiredError") {
+        res.status(401);
+        throw new Error("Token expired, please log in again");
+      } else {
+        res.status(401);
+        throw new Error("Not authorized, invalid token");
+      }
     }
   }
 );
-
-// role check middleware
 export const authorize =
   (...roles: string[]) =>
   (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -49,14 +56,12 @@ export const authorize =
       res.status(401);
       throw new Error("Not authorized");
     }
+
     if (!roles.includes(req.user.role)) {
       res.status(403);
       throw new Error("Forbidden: insufficient permissions");
     }
+
     next();
   };
-
-export const Auth = (req: Request, _res: Response, next: NextFunction) => {
-  req.body.user = "exampleUserId";
-  next();
-};
+export const Auth = protect;
