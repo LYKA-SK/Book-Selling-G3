@@ -9,10 +9,11 @@ const jwtSecret = process.env.JWT_SECRET || "change_me";
 
 export interface AuthRequest extends Request {
   user?: any;
+
 }
 
 export const protect = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction) => {
-  let token = "";
+  let token: string | undefined;
 
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -25,19 +26,27 @@ export const protect = asyncHandler(async (req: AuthRequest, res: Response, next
   }
 
   try {
-    const decoded = jwt.verify(token, jwtSecret) as any;
-    const user = await User.findById(decoded.id).select("-password");
+const decoded = jwt.verify(token, jwtSecret) as { id: string };
+    const user = await User.findById(decoded.id)
+      .select("-password");
+
     if (!user) {
       res.status(401);
       throw new Error("User not found");
     }
-    req.user = user;
+    req.user = {
+      id: user._id.toString(),
+      role: user.role,
+    };
+
+
     next();
   } catch (err) {
     res.status(401);
     throw new Error("Not authorized, token invalid");
   }
 });
+
 
 // role check middleware
 export const authorize = (...roles: string[]) => (req: AuthRequest, res: Response, next: NextFunction) => {

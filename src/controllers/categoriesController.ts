@@ -3,12 +3,29 @@ import * as CategoriesService from "../services/categoriesService";
 
 export const createCategories = async (req: Request, res: Response) => {
     try {
-        const categories = await CategoriesService.createCategories(req.body);
+        const { name, description } = req.body;
+          if (!name) {
+          res.status(400);
+          throw new Error("Category name is required");
+        }
+
+         const userId = (req as any).user?.id;
+        if (!userId) {
+            res.status(401);
+            throw new Error("User not authorized");
+        }
+
+        const categories = await CategoriesService.createCategories({
+            name,
+            description,
+            userId
+        });
         res.status(201).json({success: true, data: categories});
     } catch (error) {
         res.status(400).json({ success: false, message: (error as Error).message });
     }
 };
+
 
 // Get all categories
 export const getCategories = async (req: Request, res: Response) => {

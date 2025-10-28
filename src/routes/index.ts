@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bookRoute from "./bookRoutes";
 import authRoutes from "./auth"; // Import auth routes
+import categories from "./categoriesRoute";
 
 const router = Router();
 
@@ -12,5 +13,7 @@ router.get("/", (req, res) => {
 // Nested routes
 router.use("/books", bookRoute);
 router.use("/auth", authRoutes);
+router.use("/categories", categories);
+// router.use("/categories", require)
 
 export default router;

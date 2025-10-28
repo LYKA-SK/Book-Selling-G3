@@ -13,3 +13,4 @@ const MONGO_URI =
 connectDB(MONGO_URI).then(() => {
   app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 });
+

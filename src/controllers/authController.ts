@@ -13,11 +13,11 @@ const generateToken = (userId: string, role: string): string =>
   jwt.sign({ id: userId, role }, jwtSecret, { expiresIn: jwtExpire } as jwt.SignOptions);
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
-  const { name, email, password, role } = req.body;
+  const { firstname, lastname, username, email, password, role, phone, age } = req.body;
 
-  if (!name || !email || !password) {
+  if (!firstname || !lastname || !username || !email || !password || !phone || !age) {
     res.status(400);
-    throw new Error("name, email and password are required");
+    throw new Error("All fields are required");
   }
   if (!isEmail(email)) {
     res.status(400);
@@ -34,7 +34,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     throw new Error("email already registered");
   }
 
-  const user = await User.create({ username: name, email, password, role }) as IUser;
+  const user = await User.create({ firstname, lastname, username, email, password, role, phone, age }) as IUser;
   res.status(201).json({
     id: user._id,
     name: user.username,

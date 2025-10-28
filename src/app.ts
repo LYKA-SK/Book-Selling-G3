@@ -2,6 +2,7 @@ import express from "express";
 import router from "./routes/index";
 import adminRoutes from "./routes/admin";
 import userRoutes from "./routes/user";
+import authRoute from "./routes/auth";
 import categoriesRoutes from "./routes/categoriesRoute";
 
 
@@ -12,12 +13,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 // Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/v1", router);
 app.use("/api/users", userRoutes);
 
+//Auth routes
+app.use("/api/v1/auth", authRoute);
 //Register categories route
 app.use("/api/v1/categories", categoriesRoutes);
 
