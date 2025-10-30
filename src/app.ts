@@ -3,6 +3,8 @@ import router from "./routes/index";
 import adminRoutes from "./routes/admin";
 import userRoutes from "./routes/user";
 import categoriesRoutes from "./routes/categoriesRoute";
+import authorRoutes from "./routes/authorRoutes";
+
 
 
 
@@ -17,6 +19,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/admin", adminRoutes);
 app.use("/api/v1", router);
 app.use("/api/users", userRoutes);
+app.use("/authors", authorRoutes);
+
+
 
 //Register categories route
 app.use("/api/v1/categories", categoriesRoutes);

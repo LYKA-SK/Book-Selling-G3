@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import User, { IUser } from "../models/User";
+import User, { IUser } from "../models/UserModel";
 
 export class UserService {
   // Create new user
