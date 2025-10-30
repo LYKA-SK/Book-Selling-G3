@@ -1,10 +1,8 @@
-export interface CartItem {
-  bookId: string;
-  quantity: number;
+export interface ICart {
+  userId: string; // references User _id
+
+  bookId: string; // references Book _id
 }
 
-export interface Cart {
-  id: string;
-  userId: string;
-  items: CartItem[];
-}
+// Optional: for creation
+export interface CreateCartInput extends ICart {}
