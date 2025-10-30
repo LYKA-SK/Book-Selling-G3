@@ -3,7 +3,7 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 // import { IUser } from "../models/User"; // with curly braces
-import User from "../models/User"; // default import
+import User from "../models/UserModel"; // default import
 
 const jwtSecret = process.env.JWT_SECRET || "change_me";
 

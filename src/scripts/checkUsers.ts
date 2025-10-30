@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";
 import { connectDB } from "../config/db";
-import { User } from "../models/User";
+import  User  from "../models/UserModel";
 
 (async function checkUsers() {
   const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
@@ -22,7 +22,7 @@ import { User } from "../models/User";
   users.forEach((user, index) => {
     console.log(`User ${index + 1}:`);
     console.log(`  - ID: ${user._id}`);
-    console.log(`  - Name: ${user.name}`);
+    console.log(`  - Name: ${user.username}`);
     console.log(`  - Email: ${user.email}`);
     console.log(`  - Role: ${user.role}`);
     console.log(`  - Password Hash: ${user.password.substring(0, 20)}...`);

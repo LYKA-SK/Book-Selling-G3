@@ -1,13 +1,22 @@
-// routes/authorRoutes.ts
+// src/routes/author.routes.ts
 import { Router } from "express";
-import * as authorController from "../controllers/authorController";
+import { AuthorController } from "../controllers/authorController";
 
 const router = Router();
 
-router.post("/", authorController.createAuthorController);
-router.get("/", authorController.getAllAuthorsController);
-router.get("/:id", authorController.getAuthorByIdController);
-router.put("/:id", authorController.updateAuthorController);
-router.delete("/:id", authorController.deleteAuthorController);
+// Create a new author
+router.post("/", AuthorController.createAuthor);
+
+// Get all authors
+router.get("/", AuthorController.getAllAuthors);
+
+// Get author by ID
+router.get("/:id", AuthorController.getAuthorById);
+
+// Update author by ID
+router.put("/:id", AuthorController.updateAuthor);
+
+// Delete author by ID
+router.delete("/:id", AuthorController.deleteAuthor);
 
 export default router;

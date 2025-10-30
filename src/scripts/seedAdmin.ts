@@ -1,9 +1,8 @@
 // quick script - run with ts-node
 import dotenv from "dotenv";
 dotenv.config();
-import mongoose from "mongoose";
 import { connectDB } from "../config/db";
-import { User } from "../models/User";
+import  User  from "../models/UserModel";
 
 (async function seed() {
   const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;

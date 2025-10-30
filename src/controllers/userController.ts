@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import userService from "../services/userService";
-import { IUser } from "../models/User";
+import { IUser } from "../models/UserModel";
 
 // JWT interface
 interface JwtPayload {
@@ -156,7 +156,7 @@ class UserController {
     try {
       // The user should be attached to req by authMiddleware
       const user = (req as any).user;
-
+    
       if (!user) {
         return res.status(401).json({
           success: false,

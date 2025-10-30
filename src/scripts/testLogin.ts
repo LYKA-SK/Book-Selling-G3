@@ -4,7 +4,7 @@ dotenv.config();
 import mongoose from "mongoose";
 import { connectDB } from "../config/db";
 // import { IUser } from "../models/User"; // with curly braces
-import User from "../models/User"; // default import
+import User from "../models/UserModel"; // default import
 
 (async function testLogin() {
   const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;

@@ -20,6 +20,9 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/orders", order);
 app.use("/api/users", userRoutes);
+app.use("/authors", authorRoutes);
+
+
 
 //Auth routes
 app.use("/api/v1/auth", authRoute);
