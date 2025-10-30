@@ -1,4 +1,4 @@
-import bookModel from "../models/bookModel";
+import bookModel from "../models/bookModels";
 import { BookResult, CreateBookInput } from "../types/book";
 
 export const createBookService = async (

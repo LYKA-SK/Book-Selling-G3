@@ -9,11 +9,14 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": "./",
+    "ignoreDeprecations": "5.0",
     "paths": { "*": ["node_modules/*"] },
     "sourceMap": true,
     "resolveJsonModule": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "types": ["node", "express"],
+    "moduleResolution": "node"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts", "src/types/**/*.d.ts"],
   "exclude": ["node_modules"]
 }

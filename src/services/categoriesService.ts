@@ -5,15 +5,14 @@ import {
 import { Types } from "mongoose";
 
 export const createCategories = async (data: CreateCategoriesInput) => {
-    const { userId, bookId, name, description } = data;
+    const { userId, name, description } = data;
 
-    if (!Types.ObjectId.isValid(userId) || !Types.ObjectId.isValid(bookId)) {
-        throw new Error("Invalid userId or bookId");
+    if (!Types.ObjectId.isValid(userId)) {
+        throw new Error("Invalid userId");
     }
 
     const category = new CategoriesModel({
         userId,
-        bookId,
         name,
         description,
     });

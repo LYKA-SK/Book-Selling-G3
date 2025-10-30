@@ -10,14 +10,16 @@ const jwtSecret = process.env.JWT_SECRET || "change_me";
 const jwtExpire = process.env.JWT_EXPIRES_IN || "7d";
 
 const generateToken = (userId: string, role: string): string =>
-  jwt.sign({ id: userId, role }, jwtSecret, { expiresIn: jwtExpire } as jwt.SignOptions);
+  jwt.sign({ id: userId, role }, jwtSecret, {
+    expiresIn: jwtExpire,
+  } as jwt.SignOptions);
 
 export const register = asyncHandler(async (req: Request, res: Response) => {
-  const { name, email, password, role } = req.body;
+  const { firstname, lastname, username, email, password, role, phone, age } = req.body;
 
-  if (!name || !email || !password) {
+  if (!firstname || !lastname || !username || !email || !password || !phone || !age) {
     res.status(400);
-    throw new Error("name, email and password are required");
+    throw new Error("All fields are required");
   }
   if (!isEmail(email)) {
     res.status(400);
@@ -34,13 +36,19 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     throw new Error("email already registered");
   }
 
-  const user = await User.create({ username: name, email, password, role }) as IUser;
+  const Iuser = (await User.create({
+    username: name,
+    email,
+    password,
+    role,
+  })) as IUser;
+  const user = await User.create({ firstname, lastname, username, email, password, role, phone, age }) as IUser;
   res.status(201).json({
     id: user._id,
     name: user.username,
     email: user.email,
     role: user.role,
-    token: generateToken(user._id.toString(), user.role)
+    token: generateToken(user._id.toString(), user.role),
   });
 });
 
@@ -50,7 +58,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     res.status(400);
     throw new Error("email and password required");
   }
-  const user = await User.findOne({ email }) as IUser | null;
+  const user = (await User.findOne({ email })) as IUser | null;
   if (!user) {
     res.status(401);
     throw new Error("invalid credentials");
@@ -66,6 +74,6 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     name: user.username,
     email: user.email,
     role: user.role,
-    token: generateToken(user._id.toString(), user.role)
+    token: generateToken(user._id.toString(), user.role),
   });
 });
