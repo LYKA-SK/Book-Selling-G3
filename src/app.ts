@@ -6,6 +6,7 @@ import cartRoute from "./routes/cartRoutes";
 import cartItemRoutes from "./routes/cartitemRoutes";
 import authorRoutes from "./routes/authorRoutes";
 import order from "./routes/orderRoutes";
+import bookRoutes from "./routes/bookRoutes";
 import dotenv from "dotenv";
 const app = express();
 
@@ -14,6 +15,7 @@ dotenv.config();
 
 // Routes
 app.use("/api/admin", adminRoutes);
+app.use("/api/books", bookRoutes);
 app.use("/api/orders", order);
 app.use("/api/users", userRoutes);
 app.use("/api/v1/categories", categoriesRoutes);
