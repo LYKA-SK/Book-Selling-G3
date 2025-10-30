@@ -1,21 +1,15 @@
 import { Router } from "express";
 import * as CategoriesController from "../controllers/categoriesController";
+import { protect, authorize } from "../middlewares/auth";
 
 const router = Router();
 
-// Create a new category
-router.post("/", CategoriesController.createCategories);
+// Get all categories 🔒 Only logged-in users can view
+router.get("/", protect, CategoriesController.getCategories);
+router.get("/:id", protect, CategoriesController.getCategory);
 
-// Get all categories
-router.get("/", CategoriesController.getCategories);
-
-// Get a single category by ID
-router.get("/:id", CategoriesController.getCategory);
-
-// Update a category by ID
-router.put("/:id", CategoriesController.updateCategory);
-
-// Delete a category by ID
-router.delete("/:id", CategoriesController.deleteCategory);
-
+// 🔒 Only admin can create, update, delete
+router.post("/", protect, authorize("admin"), CategoriesController.createCategories);
+router.put("/:id", protect, authorize("admin"), CategoriesController.updateCategory);
+router.delete("/:id", protect, authorize("admin"), CategoriesController.deleteCategory);
 export default router;  

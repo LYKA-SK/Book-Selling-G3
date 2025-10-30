@@ -1,7 +1,11 @@
 import mongoose, { Document, Model } from "mongoose";
+import { Types } from "mongoose";
+
 
 // Interface for Author document
 export interface IAuthor extends Document {
+  id: string;
+  roles: string;
   name: string;
   phone: string;
   dob: Date;
