@@ -8,10 +8,12 @@ import {
   deleteOrder,
   deleteOrderItem,
 } from "../controllers/orderControllers";
-import { Auth } from "../middlewares/auth";
+
+import Auth from "../middlewares/auth"; // default import
 
 const router = Router();
 
+// Routes
 router.post("/", Auth, createOrder); // Create new order
 router.get("/", Auth, getAllOrders); // Get all orders (admin)
 router.get("/my", Auth, getUserOrders); // Get logged-in user's orders
