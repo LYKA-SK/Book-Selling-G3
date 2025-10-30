@@ -7,13 +7,18 @@ import User from "../models/User"; // default import
 
 const jwtSecret = process.env.JWT_SECRET || "change_me";
 
+export interface AuthUser {
+  id: string;
+  role: string;
+}
+
 export interface AuthRequest extends Request {
-  user?: any;
+  user?: AuthUser;
 }
 
 export const protect = asyncHandler(
   async (req: AuthRequest, res: Response, next: NextFunction) => {
-    let token = "";
+    let token: string | undefined;
 
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -26,13 +31,18 @@ export const protect = asyncHandler(
     }
 
     try {
-      const decoded = jwt.verify(token, jwtSecret) as any;
+      const decoded = jwt.verify(token, jwtSecret) as { id: string };
       const user = await User.findById(decoded.id).select("-password");
+
       if (!user) {
         res.status(401);
         throw new Error("User not found");
       }
-      req.user = user;
+      req.user = {
+        id: user._id.toString(),
+        role: user.role,
+      };
+
       next();
     } catch (err) {
       res.status(401);
@@ -42,23 +52,23 @@ export const protect = asyncHandler(
 );
 
 // role check middleware
-export const authorize =
-  (...roles: string[]) =>
-  (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authorize = (...roles: string[]): RequestHandler => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
-      res.status(401);
-      throw new Error("Not authorized");
+      return res.status(401).json({ message: "Not authorized" });
     }
+
     if (!roles.includes(req.user.role)) {
-      res.status(403);
-      throw new Error("Forbidden: insufficient permissions");
+      return res
+        .status(403)
+        .json({ message: "Forbidden: insufficient permissions" });
     }
+
     next();
   };
+};
 
-const Auth = (req: Request, res: Response, next: NextFunction) => {
+export const Auth = (req: Request, res: Response, next: NextFunction) => {
   // your authentication logic
   next();
 };
-
-export default Auth; // default export

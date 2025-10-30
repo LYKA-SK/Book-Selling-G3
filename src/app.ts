@@ -1,6 +1,7 @@
 import express from "express";
 import adminRoutes from "./routes/admin";
 import userRoutes from "./routes/user";
+import authRoute from "./routes/auth";
 import categoriesRoutes from "./routes/categoriesRoute";
 import cartRoute from "./routes/cartRoutes";
 import cartItemRoutes from "./routes/cartitemRoutes";
@@ -12,12 +13,17 @@ const app = express();
 
 app.use(express.json());
 dotenv.config();
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/orders", order);
 app.use("/api/users", userRoutes);
+
+//Auth routes
+app.use("/api/v1/auth", authRoute);
+//Register categories route
 app.use("/api/v1/categories", categoriesRoutes);
 app.use("/api/carts", cartRoute);
 app.use("/api/carts", cartItemRoutes);

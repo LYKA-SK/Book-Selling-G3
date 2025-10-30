@@ -1,5 +1,11 @@
-import Order from "../models/orderModels";
-import { IOrderInput } from "../types/orderType";
+import { Order } from "../models/orderModels";
+
+export interface IOrderInput {
+  userId: string;
+  orderItemId: string[];
+  totalAmount: number;
+  status: string;
+}
 
 export const createOrder = async (data: IOrderInput) => {
   return await Order.create(data);
@@ -7,15 +13,6 @@ export const createOrder = async (data: IOrderInput) => {
 
 export const getAllOrders = async () => {
   return await Order.find()
-    .populate({
-      path: "orderItemId",
-      populate: { path: "bookId" },
-    })
-    .populate("userId");
-};
-
-export const getOrderById = async (id: string) => {
-  return await Order.findById(id)
     .populate({
       path: "orderItemId",
       populate: { path: "bookId" },

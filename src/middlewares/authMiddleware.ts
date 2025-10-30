@@ -1,18 +1,25 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
 import User, { IUser } from "../models/User";
+import { Auth } from "mongodb/mongodb";
 
-export interface AuthenticatedRequest extends Request {
-  user?: IUser;
+export interface AuthUser {
+  id: string;
+  roles: string[];
+  [key: string]: any;
 }
 
 export const authMiddleware = async (
-  req: AuthenticatedRequest,
+  req: AuthUser,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+
+const authHeader = (req.header("Authorization") || req.headers.authorization) as
+      | string
+      | undefined;
+    const token = authHeader?.replace("Bearer ", "");
 
     if (!token) {
       return res.status(401).json({
@@ -24,16 +31,16 @@ export const authMiddleware = async (
     const secret = process.env.JWT_SECRET || "change_me";
     const decoded = jwt.verify(token, secret) as any;
 
-    const user = await User.findById(decoded.id).select("-password");
+    const userId = await User.findById(decoded.id).select("-password");
 
-    if (!user) {
+    if (!userId) {
       return res.status(401).json({
         success: false,
         message: "Token is invalid - user not found"
       });
     }
 
-    req.user = user;
+    req.user = userId;
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
@@ -58,7 +65,7 @@ export const authMiddleware = async (
 };
 
 export const adminMiddleware = (
-  req: AuthenticatedRequest,
+  req: AuthUser,
   res: Response,
   next: NextFunction
 ) => {

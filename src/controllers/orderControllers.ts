@@ -1,166 +1,169 @@
 import { Request, Response } from "express";
 import { Order } from "../models/orderModels";
 import { OrderItem } from "../models/orderItemModels";
-import Book from "../models/bookModels";
+import { Cart } from "../models/cartModels";
 
-// ======================
-// 🟢 CREATE ORDER
-// ======================
+/**
+ * Type used to represent populated cart documents
+ */
+interface PopulatedCart {
+  bookId: any;
+  userId: string;
+  quantity: number;
+}
+
+/**
+ * ==============================
+ * 🟢 CREATE ORDER
+ * ==============================
+ */
 export const createOrder = async (req: any, res: Response) => {
   try {
-    const { items } = req.body; // items = [{ bookId, quantity }]
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: "Items are required" });
+    console.log("🛒 Creating new order...");
+
+    // 1️⃣ Find user from token
+    const userId = req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: no user found" });
     }
 
-    // Create empty order first
-    const order = await Order.create({
-      userId: req.user._id,
-      status: "Pending",
-      createdAt: new Date(),
+    // 2️⃣ Find user's cart
+    const cartItems = (await Cart.find({ userId }).populate(
+      "bookId"
+    )) as unknown as PopulatedCart[];
+
+    console.log("🧺 Cart items found:", cartItems.length);
+
+    if (!cartItems.length) {
+      return res.status(400).json({ message: "Your cart is empty" });
+    }
+
+    // 3️⃣ Create order items
+    const orderItems = await Promise.all(
+      cartItems.map(async (item) => {
+        const book = item.bookId;
+        if (!book) throw new Error("Book not found in cart item");
+
+        const totalPrice = book.sellPrice * item.quantity;
+
+        const orderItem = new OrderItem({
+          bookId: book._id,
+          quantity: item.quantity,
+          sellPrice: book.sellPrice,
+          totalPrice,
+        });
+
+        await orderItem.save();
+        return orderItem._id;
+      })
+    );
+
+    // 4️⃣ Create order document
+    const order = new Order({
+      userId,
+      orderItemId: orderItems,
     });
 
-    const orderItems = [];
-
-    for (const item of items) {
-      const book = await Book.findById(item.bookId);
-      if (!book) return res.status(404).json({ message: "Book not found" });
-      if (!book.sellPrice)
-        return res.status(400).json({ message: "Book price not set" });
-
-      const totalPrice = book.sellPrice * item.quantity;
-
-      const orderItem = await OrderItem.create({
-        orderId: order._id,
-        bookId: book._id,
-        quantity: item.quantity,
-        totalPrice,
-        sellPrice: book.sellPrice,
-      });
-
-      orderItems.push(orderItem._id);
-    }
-
-    order.orderItems = orderItems;
     await order.save();
 
-    const populatedOrder = await Order.findById(order._id)
-      .populate("userId", "userName email")
-      .populate({
-        path: "orderItems",
-        populate: { path: "bookId", select: "title author sellPrice" },
-      });
+    // 5️⃣ Clear the user's cart
+    await Cart.deleteMany({ userId });
 
-    res.status(201).json(populatedOrder);
-  } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    console.log("✅ Order created successfully:", order._id);
+
+    res.status(201).json({
+      message: "✅ Order created successfully",
+      order,
+    });
+  } catch (error: any) {
+    console.error("❌ Error in createOrder:", error);
+    res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message || "Unknown error",
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
 
-// ======================
-// 🔵 READ ALL ORDERS (Admin)
-// ======================
+/**
+ * ==============================
+ * 🟣 GET ALL ORDERS (Admin)
+ * ==============================
+ */
 export const getAllOrders = async (req: Request, res: Response) => {
   try {
     const orders = await Order.find()
-      .populate("userId", "userName email")
+      .populate("userId", "firstName lastName email")
       .populate({
-        path: "orderItems",
+        path: "orderItemId",
         populate: { path: "bookId", select: "title author sellPrice" },
       });
-    res.json(orders);
-  } catch (err: any) {
-    res.status(500).json({ message: err.message });
+
+    res.status(200).json(orders);
+  } catch (error: any) {
+    console.error("❌ Error in getAllOrders:", error);
+    res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message || "Unknown error",
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
 
-// ======================
-// 🟣 READ USER ORDERS
-// ======================
+/**
+ * ==============================
+ * 🟢 GET USER'S ORDERS
+ * ==============================
+ */
 export const getUserOrders = async (req: any, res: Response) => {
   try {
-    const orders = await Order.find({ userId: req.user._id })
+    const userId = req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized: no user found" });
+    }
+
+    const orders = await Order.find({ userId })
       .populate({
-        path: "orderItems",
+        path: "orderItemId",
         populate: { path: "bookId", select: "title author sellPrice" },
       })
       .sort({ createdAt: -1 });
 
-    res.json(orders);
-  } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    res.status(200).json(orders);
+  } catch (error: any) {
+    console.error("❌ Error in getUserOrders:", error);
+    res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message || "Unknown error",
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
 
-// ======================
-// 🟡 READ ONE ORDER BY ID
-// ======================
+/**
+ * ==============================
+ * 🟠 GET ONE ORDER BY ID
+ * ==============================
+ */
 export const getOrderById = async (req: Request, res: Response) => {
   try {
-    const order = await Order.findById(req.params.id)
-      .populate("userId", "userName email")
+    const orderId = req.params.id;
+    const order = await Order.findById(orderId)
       .populate({
-        path: "orderItems",
+        path: "orderItemId",
         populate: { path: "bookId", select: "title author sellPrice" },
-      });
+      })
+      .populate("userId", "firstName lastName email");
 
     if (!order) return res.status(404).json({ message: "Order not found" });
-    res.json(order);
-  } catch (err: any) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
-// ======================
-// 🟠 UPDATE ORDER ITEM
-// ======================
-export const updateOrderItem = async (req: Request, res: Response) => {
-  try {
-    const { quantity } = req.body;
-    const item = await OrderItem.findById(req.params.id).populate("bookId");
-
-    if (!item) return res.status(404).json({ message: "Order item not found" });
-
-    item.quantity = quantity;
-    item.totalPrice = item.sellPrice * quantity;
-    await item.save();
-
-    res.json(item);
-  } catch (err: any) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// ======================
-// 🔴 DELETE ORDER
-// ======================
-export const deleteOrder = async (req: Request, res: Response) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: "Order not found" });
-
-    // Delete all order items linked to this order
-    await OrderItem.deleteMany({ orderId: order._id });
-    await order.deleteOne();
-
-    res.json({ message: "Order and related items deleted successfully" });
-  } catch (err: any) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// ======================
-// 🔴 DELETE ONE ORDER ITEM
-// ======================
-export const deleteOrderItem = async (req: Request, res: Response) => {
-  try {
-    const orderItem = await OrderItem.findById(req.params.id);
-    if (!orderItem)
-      return res.status(404).json({ message: "Order item not found" });
-
-    await orderItem.deleteOne();
-    res.json({ message: "Order item deleted successfully" });
-  } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    res.status(200).json(order);
+  } catch (error: any) {
+    console.error("❌ Error in getOrderById:", error);
+    res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message || "Unknown error",
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
